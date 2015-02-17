@@ -30,11 +30,11 @@ public class LocationReceiver extends BroadcastReceiver {
 
 	}
 
-	private void onProviderEnabledChanged(boolean enabled) {
+	protected void onProviderEnabledChanged(boolean enabled) {
 		//TODO
 	}
 
-	private void onLocationReceived(Context context, Location loc) {
+	protected void onLocationReceived(Context context, Location loc) {
 		//TODO
 	}
 }
