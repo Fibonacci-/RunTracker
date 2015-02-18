@@ -2,6 +2,7 @@ package com.helwigdev.runtracker;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ public class RunFragment extends Fragment {
 	private static final String TAG = "RunFragment";
 	private static final String ARG_RUN_ID = "RUN_ID";
 	private static final int LOAD_RUN = 0;
+	private static final int LOAD_LOCATION = 1;
 
 	private BroadcastReceiver mLocationReceiver = new LocationReceiver(){
 		@Override
@@ -42,6 +44,7 @@ public class RunFragment extends Fragment {
 
 	private Button mStartButton;
 	private Button mStopButton;
+	private Button mMapButton;
 	private TextView mStartedTextView, mLatitudeTextView, mLongitudeTextView, mAltitudeTextView, mDurationTextView;
 
 	private RunManager mRunManager;
@@ -68,6 +71,7 @@ public class RunFragment extends Fragment {
 
 		mStartButton = (Button) v.findViewById(R.id.run_startButton);
 		mStopButton = (Button) v.findViewById(R.id.run_stopButton);
+		mMapButton = (Button) v.findViewById(R.id.run_mapButton);
 
 		mStartButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -85,6 +89,14 @@ public class RunFragment extends Fragment {
 			public void onClick(View v) {
 				mRunManager.stopRun();
 				updateUI();
+			}
+		});
+		mMapButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getActivity(), RunMapActivity.class);
+				i.putExtra(RunMapActivity.EXTRA_RUN_ID, mRun.getId());
+				startActivity(i);
 			}
 		});
 
@@ -117,7 +129,7 @@ public class RunFragment extends Fragment {
 			if(runId != -1){
 				LoaderManager lm = getLoaderManager();
 				lm.initLoader(LOAD_RUN, args, new RunLoaderCallbacks());
-				mLastLocation = mRunManager.getLastLocationForRun(runId);
+				lm.initLoader(LOAD_LOCATION, args, new LocationLoaderCallbacks());
 			}
 		}
 	}
@@ -137,6 +149,9 @@ public class RunFragment extends Fragment {
 			mLatitudeTextView.setText(Double.toString(mLastLocation.getLatitude()));
 			mLongitudeTextView.setText(Double.toString(mLastLocation.getLongitude()));
 			mAltitudeTextView.setText(Double.toString(mLastLocation.getAltitude()));
+			mMapButton.setEnabled(true);
+		} else {
+			mMapButton.setEnabled(false);
 		}
 		mDurationTextView.setText(Run.formatDuration(durationSeconds));
 
@@ -164,5 +179,24 @@ public class RunFragment extends Fragment {
 		}
 
 
+	}
+
+	private class LocationLoaderCallbacks implements LoaderManager.LoaderCallbacks<Location>{
+
+		@Override
+		public Loader<Location> onCreateLoader(int id, Bundle args) {
+			return new LastLocationLoader(getActivity(), args.getLong(ARG_RUN_ID));
+		}
+
+		@Override
+		public void onLoadFinished(Loader<Location> loader, Location data) {
+			mLastLocation = data;
+			updateUI();
+		}
+
+		@Override
+		public void onLoaderReset(Loader<Location> loader) {
+			//bah humbug
+		}
 	}
 }

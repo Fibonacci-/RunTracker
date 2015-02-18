@@ -100,9 +100,21 @@ public class RunDatabaseHelper extends SQLiteOpenHelper {
 		return new LocationCursor(wrapped);
 	}
 
+	public LocationCursor queryLocationsForRun(long runId){
+		Cursor wrapped = getReadableDatabase().query(TABLE_LOCATION,
+				null,
+				COLUMN_LOCATION_RUN_ID + " = ?",//limit to given run
+				new String[]{String.valueOf(runId)},
+				null,
+				null,
+				COLUMN_LOCATION_TIMESTAMP + " asc"
+		);
+		return new LocationCursor(wrapped);
+	}
+
 	/**
 	 * A convenience class to wrap a cursor that returns rows from the "run" table.
-	 * The {@link getRun()} method will give you a Run instance representing the current row.
+	 * The getRun() method will give you a Run instance representing the current row.
 	 */
 	public static class RunCursor extends CursorWrapper {
 

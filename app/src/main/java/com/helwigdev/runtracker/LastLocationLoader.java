@@ -17,6 +17,6 @@ public class LastLocationLoader extends DataLoader<Location> {
 
 	@Override
 	public Location loadInBackground() {
-		return null;
+		return RunManager.get(getContext()).getLastLocationForRun(mRunId);
 	}
 }
